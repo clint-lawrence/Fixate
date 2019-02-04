@@ -183,6 +183,12 @@ class VirtualAddressMap:
 
 class AddressHandler:
     """
+    An AddressHandler class is used to define a set of physical input or output signals.
+
+    Typically, each name in the pin_list is a unique digital signal. For example, an 8-bit GPIO port could be
+    represented as and AddressHandler with eight names in the pin_list. While not enforced, it is recommended that
+    all of the signals updates by a single AddressHandler care update
+
     :param pin_list: Iterable of pins (type string) that the AddressHandler handles
     :param defaults: Iterable of pins (type string subset of pin_list) that should default to high logic on reset
     """
@@ -190,10 +196,15 @@ class AddressHandler:
     pin_defaults = ()
 
     def update_output(self, value):
-        pass
+        """
+
+        :param value:
+        :return:
+        """
+        raise NotImplementedError
 
     def update_input(self):
-        pass
+        raise NotImplementedError
 
     def defaults(self):
         """
@@ -528,6 +539,323 @@ class VirtualMux:
         return self.__class__.__name__
 
 
+#########
+# New VirtualMux implementation. Will replace the implementation above once it is complete
+#########
+
+
+class TmpVirtualMux:
+    # pin_list:
+    # A list containing the virtual pins that need to be exercised by the address handlers.
+    # When building the mux using the map_tree, the pin_list is interpreted as an ordered list
+    # where each pin represent one bit location in a 'virtual address'
+    # First element in the list is MSB and last element is LSB
+    #      [MSB, x, y, z, LSB] of the address space.
+    #
+    # When using a map_list definition, the order of the pin_list is not relevant.
+    pin_list = []
+
+    # either map_list or map_tree must be defined when creating a subclass. Only one should be defined, the
+    # other should not be defined in a subclass, or should be set to None.
+
+    # A sequence of sequences. Each element of the sequence is a signal definition
+    # The first element of each subsequence is the definition of a signal name, followed by
+    # any number of pin names, that must be in the pin_list.
+    map_list = None
+    map_tree = None
+
+    # Can be set to any signal name defined in map_list or map_tree.
+    # If not otherwise defined, the default signal will be with all pins in the pin list off
+    default_signal = None
+
+    def __call__(self, signal_output, trigger_update=True):
+        self.multiplex(signal_output, trigger_update)
+
+    def __init__(self):
+        # state_update_time can get used to check how long since the mux switched.
+        # the attribute should be read only and not set by the user off the mux
+        self.state_update_time = time.time()
+
+        # Dict mapping a signal name to a set of pins that need to be asserted for that signal
+        # {"<signal name>": {"pin_1", "pin_2", ..., "pin_N"}, ...}
+        self._signal_map = {}
+
+        # _map_signals looks at map_tree and map_list and uses that data to build the _signal_map
+        self._map_signals()
+
+        # A virtual mux needs to be connected to a parent address map. The virtual mux writes pin
+        # updates to the address map to change signals.
+        self.parent_address_map = None
+
+        # for most operations, a set is better. Once the _signal_map is setup, the pin order doesn't matter.
+        self._pin_set = set(self.pin_list)
+
+        self.state = self.default_signal
+
+    def multiplex(self, signal_output, trigger_update=True):
+        """
+        Switch the current state of the multiplexer to signal.
+
+        signal_output must be one of the signals defined in map_list or map_tree. By default, trigger_update will
+        be True, in which case the VirtualMux will immediately send the new pin state to the attached
+        VirtualAddressMap to write out do the configured driver.
+
+        If trigger_update is set to False, the new pin state will be sent to the VirtualAddressMap but it will
+        not be written to the driver until an update is triggered. This can be used to synchronise the switching
+        of multiple VirtualMux's
+        """
+        if signal_output is "":
+            # TODO: We used to allow this, so we should continue to...
+            pins_to_set = set()
+        else:
+            try:
+                pins_to_set = self._signal_map[signal_output]
+            except ValueError as e:
+                raise ValueError("signal_output {} not found in multiplexer '{}'".format(signal_output,
+                                                                                         self.__class__.__name__)) from e
+
+        pin_states = ((pin, pin in pins_to_set) for pin in self._pin_set)
+        self.parent_address_map.new_pin_states(pin_states, trigger_update)
+
+        if signal_output != self.state:
+            self.state_update_time = time.time()
+        self.state = signal_output
+
+
+
+    # TODO: delete?
+    def _check_duplicates(self, addr, value):
+        if addr in self._reserved_addr:
+            dup = "UNKNOWN"
+            for k, v in self.signal_map.items():
+                if addr == v:
+                    dup = k
+                    break
+            raise ValueError("Address 0b{:b} already in use\n{} is a duplicate of {}".format(addr, value, dup))
+        self._reserved_addr.add(addr)
+
+    def map_shifted(self, base_index, start_index, values):
+        """
+        Shifts the values for the sparse mapping of the signal map.
+        :param base_index number to add to the index after the shifting. eg the default state of the values
+        :param start_index the initial index that needs to be shifted
+        """
+        for index, value in enumerate(values):
+            if value is None:
+                continue
+            addr = (index << start_index) + base_index
+            self._check_duplicates(addr, value)
+            self.signal_map[value] = addr
+
+    def defaults(self):
+        """
+        Sets the default state of the multiplexer
+        :return:
+        """
+        self.multiplex(self.default_signal)
+
+    @deprecated
+    def map_single(self, value, *pin_names):
+        """
+        Maps a single value based on the pin names by bitwise OR on the shifted pins
+        """
+        if value is None:
+            raise ValueError("map_single cannot be called with value as None")
+        addr = 0
+        for name in pin_names:
+            try:
+                addr |= 1 << self.pin_list.index(name)
+            except ValueError as e:
+                raise Exception(
+                    'pin "{}" was not found in pin_list of VirtualMux {}'.format(name, self.__class__)) from e
+        self._check_duplicates(addr, value)
+        self.signal_map[value] = addr
+
+    def condensed_signal_map(self):
+        binary_length = "0b{:0" + "{}".format(len(self.pin_list)) + "b}"
+        return sorted([(binary_length.format(ind), val) for val, ind in self.signal_map.items()])
+
+    def map_signals(self):
+        """
+        Override this method to map the signals in the signal map on initialisation
+        """
+        try:
+            map_tree = self.map_tree
+        except AttributeError:
+            try:
+                self.map_list
+            except AttributeError:
+                pass
+            else:
+                for signal in self.map_list:
+                    self.map_single(*signal)
+        else:
+            self._map_tree(map_tree, 0, 0)
+
+    def _map_tree(self, branch, base_offset, base_bits):
+        """recursively add nested signal lists to the signal map.
+        branch: is the current sub branch to be added. At the first call
+        level, this would be initialised with self.map_tree. It can be
+        any sequence, possibly nested.
+
+        base_offset: should be the integer value of the address
+        where the branch enters into the top level multiplexer.
+
+        base_bits: At each call level, this represents the number
+        of less significant address bits that are used to represent
+        multiplexers higher up the chain.
+
+        example:
+        This shows 10 signal, routed through a number of multiplexers.
+        Mux B and Mux B' are distinct, but address of common control
+        signals. Mux C and Mux B/B' are nested to various levels into
+        the final multiplexer Mux A.
+
+        The pin_list defines the control signals from least to most significant
+        The map_tree defines the signals into each multipler. Nesting containers
+        reflects the nesting of mux's.
+                                          __________
+        a0-------------------------------|          |
+                              ________   |          |
+        a1_b0----------------|        |--|  Mux A   |
+        a1_b1----------------| Mux B  |  |   4:1    |
+        a1_b2----------------|  4:1   |  |          |
+                     (None)--|_x3__x2_|  |          |
+                                         |          |
+                              ________   |          |
+        a2_b0----------------|        |  |          |
+                   _______   |        |--|          |------ Output
+        a2_b1_c0--| Mux C |--| Mux B' |  |          |
+        a2_b1_c1--|  2:1  |  |  4:1   |  |          |
+                  |___x4__|  |        |  |          |
+                             |        |  |          |
+        a2_b2----------------|        |  |          |
+        a2_b3----------------|        |  |          |
+                             |_x3__x2_|  |          |
+                                         |          |
+        a3-------------------------------|          |
+                                         |__x1__x0__|
+
+        class Mux(VirtualMux):
+            pin_list = ("x0", "x1", "x2", "x3", "x4")
+            map_tree = ("a0",
+                        (#a1
+                            "a1_b0",
+                            "a1_b1",
+                            "a1_b2",
+                            None,
+                        ),
+                        (#a2
+                            "a2_b0",
+                            (#b1
+                                "a2_b1_c0",
+                                "a2_b1_c1",
+                            ),
+                            "a2_b2",
+                            "a2_b3",
+                        ),
+                        "a3"
+                    )
+
+        Alternatively:
+
+        class Mux(VirtualMux):
+            pin_list = ("x0", "x1", "x2", "x3", "x4")
+
+            mux_c = ("a2_b1_c0", "a2_b1_c1")
+            mux_b1 = ("a1_b0", "a1_b1", "a1_b2", None)
+            mux_b2 = ("a2_b0", mux_c, "a2_b2", "a2_b3")
+
+            map_tree = ("a0", mux_b1, mux_b2, "a3")
+
+        Final mapping:
+        addr    signal
+        --------------
+        0       a0
+        1       a1_b0
+        2       a2_b0
+        3       a3
+        4
+        5       a1_b1
+        6       a2_b1_c0
+        7
+        8
+        9       a1_b2
+        10      a2_b2
+        11
+        12
+        13      (None)
+        14      a2_b3
+        15
+        16
+        17
+        18
+        19
+        20
+        21
+        22      a2_b1_c1
+        23
+        24
+        25
+        26
+        27
+        28
+        29
+        30
+        31
+
+        For Multiplexers that depend on separate control pins, try using the shift_nested function to help
+        with sparse mapping
+                                          __________
+        a0-------------------------------|          |
+                              ________   |          |
+        a1_b0----------------|        |--|          |
+        a1_b1----------------| Mux B  |  |          |
+        a1_b2----------------|  4:1   |  |          |
+                     (None)--| x3  x2 |  |          |
+                             |________|  |          |
+                                         |  Mux A   |
+        a2-------------------------------|   4:1    |
+                              ________   |          |
+        a3_c0----------------|        |--|          |
+        a3_c1----------------| Mux C  |  |          |
+        a3_c2----------------|  4:1   |  |          |
+                     (None)--| x5  x4 |  |          |
+                             |________|  |          |
+                                         |__x1__x0__|
+
+        class Mux(VirtualMux):
+            pin_list = ("x0", "x1", "x2", "x3", "x4")
+
+            mux_c = ("a3_c0", "a3_c1", "a3_c2", None)
+            mux_b = ("a1_b0", "a1_b1", "a1_b2", None)
+
+            map_tree = (
+            "a0",
+            mux_b,
+            shift_nested(mux_c, [2]),  # 2 in indicative on how many pins to skip. This case is (x2, x3) from mux_b
+            "a3")
+
+        """
+        for i, signal in enumerate(branch):
+            current_index = (i * 1 << base_bits) + base_offset
+
+            if isinstance(signal, str):
+                # Add signal to out mapping
+                self._check_duplicates(current_index, signal)
+                self.signal_map[signal] = current_index
+            elif signal is None:
+                pass
+            else:
+                # We have a nested signal definition, so we recurse.
+                # number of addr bits needed for the current branch:
+                current_bits = int(ceil(log(len(branch), 2)))
+                self._map_tree(signal, current_index, base_bits + current_bits)
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+
 def shift_nested(values, shift_arr):
     """
     :param values:
@@ -573,6 +901,8 @@ class VirtualSwitch(VirtualMux):
     map_tree = ("FALSE", "TRUE")
 
     def multiplex(self, signal_output, trigger_update=True):
+        # Note: we're not testing that signal_output evaluates to True or False, we testing if it *is* True or False.
+        # otherwise, many incorrect arguments could silently be evaluated as True/False without raising an error.
         if signal_output is True:
             signal = "TRUE"
         elif signal_output is False:
