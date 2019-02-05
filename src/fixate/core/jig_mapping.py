@@ -545,7 +545,6 @@ class VirtualMux:
 
 
 class TmpVirtualMux:
-    # pin_list:
     # A list containing the virtual pins that need to be exercised by the address handlers.
     # When building the mux using the map_tree, the pin_list is interpreted as an ordered list
     # where each pin represent one bit location in a 'virtual address'
@@ -573,7 +572,7 @@ class TmpVirtualMux:
 
     def __init__(self):
         # state_update_time can get used to check how long since the mux switched.
-        # the attribute should be read only and not set by the user off the mux
+        # the attribute should be treated as read only and never written by the user of the mux
         self.state_update_time = time.time()
 
         # Dict mapping a signal name to a set of pins that need to be asserted for that signal
@@ -585,24 +584,30 @@ class TmpVirtualMux:
 
         # A virtual mux needs to be connected to a parent address map. The virtual mux writes pin
         # updates to the address map to change signals.
-        self.parent_address_map = None
+        self._parent_address_map = None
 
         # for most operations, a set is better. Once the _signal_map is setup, the pin order doesn't matter.
         self._pin_set = set(self.pin_list)
 
-        self.state = self.default_signal
+        # Current switched signal. Part of the public API, user of a mux can read this attribute to check
+        # the current state. It should never be directly written to. Initialises to None, since it is not
+        # possible to clock out the default state at initialisation. The state of the hardware at power
+        # up will be a function of the specific hardware and the previous command sent to the hardware.
+        self.state = None
 
     def multiplex(self, signal_output, trigger_update=True):
         """
         Switch the current state of the multiplexer to signal.
 
-        signal_output must be one of the signals defined in map_list or map_tree. By default, trigger_update will
+        signal_output must be one of the signals defined in map_list or map_tree**. By default, trigger_update will
         be True, in which case the VirtualMux will immediately send the new pin state to the attached
         VirtualAddressMap to write out do the configured driver.
 
         If trigger_update is set to False, the new pin state will be sent to the VirtualAddressMap but it will
         not be written to the driver until an update is triggered. This can be used to synchronise the switching
         of multiple VirtualMux's
+
+        ** There is one exception to that rule. The signal "" is also accepted and switches all pins off.
         """
         if signal_output is "":
             # TODO: We used to allow this, so we should continue to...
@@ -614,84 +619,71 @@ class TmpVirtualMux:
                 raise ValueError("signal_output {} not found in multiplexer '{}'".format(signal_output,
                                                                                          self.__class__.__name__)) from e
 
+        # Build a sequence of (pin, state) pairs. pins that are in pins_to_set will be True. All other
+        # pins in the pin_list will be set as False.
         pin_states = ((pin, pin in pins_to_set) for pin in self._pin_set)
-        self.parent_address_map.new_pin_states(pin_states, trigger_update)
+        self._parent_address_map.new_pin_states(pin_states, trigger_update)
 
         if signal_output != self.state:
             self.state_update_time = time.time()
         self.state = signal_output
 
-
-
-    # TODO: delete?
-    def _check_duplicates(self, addr, value):
-        if addr in self._reserved_addr:
-            dup = "UNKNOWN"
-            for k, v in self.signal_map.items():
-                if addr == v:
-                    dup = k
-                    break
-            raise ValueError("Address 0b{:b} already in use\n{} is a duplicate of {}".format(addr, value, dup))
-        self._reserved_addr.add(addr)
-
-    def map_shifted(self, base_index, start_index, values):
+    def _check_duplicates(self):
         """
-        Shifts the values for the sparse mapping of the signal map.
-        :param base_index number to add to the index after the shifting. eg the default state of the values
-        :param start_index the initial index that needs to be shifted
+        Check for signals which have the same pins mapped.
+
+        Build a dictionary keyed on tuples, built on sorted pin lists. The dict element value will be the signal
+        name. i.e. we're inverting the dict. The for each signal, check if it's in the dict. If so, we have a
+        duplicate. If not, add it.
         """
-        for index, value in enumerate(values):
-            if value is None:
-                continue
-            addr = (index << start_index) + base_index
-            self._check_duplicates(addr, value)
-            self.signal_map[value] = addr
+
+        reverse_signal_map = {}
+        for signal, pins in self._signal_map:
+            key = tuple(sorted(pins))
+
+            if key in reverse_signal_map:
+                raise ValueError(f"Error in definition of '{self.__name__}':\n"
+                                 f"Signals '{signal}' and '{reverse_signal_map[key]} and the same pin mapping.'\n"
+                                 f"{key}")
+            else:
+                reverse_signal_map[key] = signal
 
     def defaults(self):
         """
-        Sets the default state of the multiplexer
+        Switches the multiplexer to its default signal.
         :return:
         """
         self.multiplex(self.default_signal)
 
-    @deprecated
-    def map_single(self, value, *pin_names):
-        """
-        Maps a single value based on the pin names by bitwise OR on the shifted pins
-        """
-        if value is None:
-            raise ValueError("map_single cannot be called with value as None")
-        addr = 0
-        for name in pin_names:
-            try:
-                addr |= 1 << self.pin_list.index(name)
-            except ValueError as e:
-                raise Exception(
-                    'pin "{}" was not found in pin_list of VirtualMux {}'.format(name, self.__class__)) from e
-        self._check_duplicates(addr, value)
-        self.signal_map[value] = addr
-
     def condensed_signal_map(self):
+        # TODO: reimplement for new mapping
         binary_length = "0b{:0" + "{}".format(len(self.pin_list)) + "b}"
         return sorted([(binary_length.format(ind), val) for val, ind in self.signal_map.items()])
 
-    def map_signals(self):
+    def _map_signals(self):
         """
-        Override this method to map the signals in the signal map on initialisation
+        Check that either map_tree or map_list is defined and build the signal maps as required. Only off the
+        mappings can be defined.
         """
-        try:
-            map_tree = self.map_tree
-        except AttributeError:
-            try:
-                self.map_list
-            except AttributeError:
-                pass
-            else:
-                for signal in self.map_list:
-                    self.map_single(*signal)
-        else:
-            self._map_tree(map_tree, 0, 0)
 
+        if self.map_tree and self.map_list:
+            raise Exception(f"Error in definition of {self.__name__}. Only one of map_tree or map_list can be defined")
+
+        elif self.map_list:
+            # The map_list is almost directly in the same format as our actual signal map
+            # The first element of each map entry is the signal name and the remaining elements for the pin set.
+            for map_entry in self.map_list:
+                self._signal_map[map_entry[0]] = set(map_entry[1:])
+
+        elif self.map_tree:
+            self._map_tree(self.map_tree, 0, 0)
+
+        else:
+            raise Exception(f"Error in definition of {self.__name__}. Either map_tree or map_list must be defined")
+
+        self._check_duplicates()
+
+    # TODO: reimplement for the new signal map
     def _map_tree(self, branch, base_offset, base_bits):
         """recursively add nested signal lists to the signal map.
         branch: is the current sub branch to be added. At the first call
@@ -853,7 +845,7 @@ class TmpVirtualMux:
                 self._map_tree(signal, current_index, base_bits + current_bits)
 
     def __repr__(self):
-        return self.__class__.__name__
+        return self.__name__
 
 
 def shift_nested(values, shift_arr):
