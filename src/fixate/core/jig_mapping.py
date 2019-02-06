@@ -638,11 +638,11 @@ class TmpVirtualMux:
         """
 
         reverse_signal_map = {}
-        for signal, pins in self._signal_map:
+        for signal, pins in self._signal_map.items():
             key = tuple(sorted(pins))
 
             if key in reverse_signal_map:
-                raise ValueError(f"Error in definition of '{self.__name__}':\n"
+                raise ValueError(f"Error in definition of '{self.__class__.__name__}':\n"
                                  f"Signals '{signal}' and '{reverse_signal_map[key]} and the same pin mapping.'\n"
                                  f"{key}")
             else:
@@ -656,9 +656,21 @@ class TmpVirtualMux:
         self.multiplex(self.default_signal)
 
     def condensed_signal_map(self):
-        # TODO: reimplement for new mapping
+        """
+        A sorted list of binary "virtual address" and signal name, for each signal in the signal map.
+        :return: A list of tuples. (str: binary representation of virtual address, str: signal name)
+        """
+        # Create a dictionary mapping pin names to their weighted 'address' value.
+        pin_weights = {pin_name: 1 << i for i, pin_name in enumerate(self.pin_list)}
+
+        # Create a template string with the max length for the binary address value set
         binary_length = "0b{:0" + "{}".format(len(self.pin_list)) + "b}"
-        return sorted([(binary_length.format(ind), val) for val, ind in self.signal_map.items()])
+        condensed_signal_map = []
+        for signal_name, pin_set in self._signal_map.items():
+            signal_address = sum(pin_weights[pin_name] for pin_name in pin_set)
+            condensed_signal_map.append((binary_length.format(signal_address), signal_name))
+
+        return sorted(condensed_signal_map)
 
     def _map_signals(self):
         """
@@ -683,7 +695,6 @@ class TmpVirtualMux:
 
         self._check_duplicates()
 
-    # TODO: reimplement for the new signal map
     def _map_tree(self, branch, base_offset, base_bits):
         """recursively add nested signal lists to the signal map.
         branch: is the current sub branch to be added. At the first call
@@ -830,12 +841,12 @@ class TmpVirtualMux:
 
         """
         for i, signal in enumerate(branch):
+            # Current index is the 'address' that represent the pins to turn on
             current_index = (i * 1 << base_bits) + base_offset
 
             if isinstance(signal, str):
                 # Add signal to out mapping
-                self._check_duplicates(current_index, signal)
-                self.signal_map[signal] = current_index
+                self.signal_map[signal] = self._index_to_pin_set(current_index)
             elif signal is None:
                 pass
             else:
@@ -844,8 +855,26 @@ class TmpVirtualMux:
                 current_bits = int(ceil(log(len(branch), 2)))
                 self._map_tree(signal, current_index, base_bits + current_bits)
 
+    def _index_to_pin_set(self, index):
+        """
+        Return a set of pins from the pin list, corresponding to the binary representation of `index`
+
+        When using map_tree, the pin_list is interpreted as LSB to MSB as an address. This helper
+        function help map between the two concepts.
+
+        :param index: The virtual address value representing the pins corresponding to the bits in index
+        :return: A set (possibly empty) containing pin names from `self.pin_list`
+        """
+        # Turn index into a binary represented string, drop the 0b of the front.
+        # Then reverse the string so we get LSB first. When we iterate over the string,
+        # we only get significant bits. i.e. if the high pins aren't on, it doesn't matter
+        # that we don't iterate on them, because we wouldn't set them anyway.
+        index_as_binary = reversed(bin(index)[2:])
+        pins_to_turn_on = {self.pin_list[bit] for bit, state in enumerate(index_as_binary) if state == '1'}
+        return pins_to_turn_on
+
     def __repr__(self):
-        return self.__name__
+        return self.__class__.__name__
 
 
 def shift_nested(values, shift_arr):

@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from fixate.core.jig_mapping import VirtualAddressMap, AddressHandler, VirtualMux
+from fixate.core.jig_mapping import VirtualAddressMap, AddressHandler, VirtualMux, TmpVirtualMux
 
 try:
     # This try/except is temporary while moving tests to pytest. running
@@ -299,3 +299,101 @@ class TestDuplicateSignalNames(TestCase):
     def test_map_combo(self):
         mux = map_data.TestMultipleDefsFails()
         self.assertRaisesRegex(ValueError, "Test5 is a duplicate of Test4", mux.map_combo)
+
+class TmpVirtualMux_abcd(TmpVirtualMux):
+    pin_list = ["a", "b", "c", "d"]
+    map_list = [("foo", )]
+
+
+class TestTmpVirtualMux_index_to_pin_set(TestCase):
+    def setUp(self):
+        self.mux = TmpVirtualMux_abcd()
+
+    def test_index_0(self):
+        self.assertEqual(set(), self.mux._index_to_pin_set(0))
+
+    def test_index_all_on(self):
+        self.assertEqual(set(self.mux.pin_list), self.mux._index_to_pin_set(15))
+
+    def test_bit0(self):
+        self.assertEqual(set("a"), self.mux._index_to_pin_set(1))
+
+    def test_bit1(self):
+        self.assertEqual(set("b"), self.mux._index_to_pin_set(2))
+
+    def test_bit2(self):
+        self.assertEqual(set("c"), self.mux._index_to_pin_set(4))
+
+    def test_bit3(self):
+        self.assertEqual(set("d"), self.mux._index_to_pin_set(8))
+
+    def test_3(self):
+        self.assertEqual(set(("a", "b")), self.mux._index_to_pin_set(3))
+
+class TestTmpVirtualMux_condensed_signal_map(TestCase):
+    def test_one_signal_no_pins(self):
+        class TestMux(TmpVirtualMux_abcd):
+            pass
+        mux = TestMux()
+        expect = [('0b0000', 'foo')]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+    def test_one_signal_all_pins(self):
+        class TestMux(TmpVirtualMux_abcd):
+            map_list = [('foo', 'a', 'b', 'c', 'd')]
+        mux = TestMux()
+        expect = [('0b1111', 'foo')]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+    def test_one_signal_all_pins_change_order_of_pins(self):
+        class TestMux(TmpVirtualMux_abcd):
+            map_list = [('foo', 'a', 'd', 'c', 'b')]
+        mux = TestMux()
+        expect = [('0b1111', 'foo')]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+    def test_one_signal_pin0(self):
+        class TestMux(TmpVirtualMux_abcd):
+            map_list = [('foo', 'a', )]
+        mux = TestMux()
+        expect = [('0b0001', 'foo')]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+    def test_one_signal_pin1(self):
+        class TestMux(TmpVirtualMux_abcd):
+            map_list = [('foo', 'b', )]
+        mux = TestMux()
+        expect = [('0b0010', 'foo')]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+    def test_one_signal_pin4and1(self):
+        class TestMux(TmpVirtualMux_abcd):
+            map_list = [('foo', 'd', 'b', )]
+        mux = TestMux()
+        expect = [('0b1010', 'foo')]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+    def test_multiple_signals(self):
+        class TestMux(TmpVirtualMux_abcd):
+            map_list = [('0', ),
+                        ('1', 'a'),
+                        ('2', 'b'),
+                        ('5', 'a', 'c'),
+                        ('7', 'd', 'a'),
+                        ('12', 'c', 'd'),
+                        ('15', 'a', 'b', 'c', 'd'),
+                        ]
+        mux = TestMux()
+        expect = [('0b0000', '0'),
+                  ('0b0001', '1'),
+                  ('0b0010', '2'),
+                  ('0b0101', '5'),
+                  ('0b1001', '7'),
+                  ('0b1100', '12'),
+                  ('0b1111', '15'),
+                  ]
+        self.assertEqual(expect, mux.condensed_signal_map())
+
+
+
+
