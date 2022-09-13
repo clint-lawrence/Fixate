@@ -1,3 +1,4 @@
+from typing import Iterable, Union
 import ruamel.yaml
 import pathlib
 import fixate.config
@@ -75,7 +76,7 @@ class _UnseenFormatter(Formatter):
             return Formatter.get_value(key, args, kwargs)
 
 
-def render_template(_template: [str, list, tuple], *args, **kwargs):
+def render_template(_template: Union[str, Iterable[str]], *args, **kwargs):
     """
     :param template: Template string or list
     :param kwargs:

@@ -94,7 +94,7 @@ class AgilentU1732C(LCR):
         self._frequency = 100
 
     @property
-    def frequency(self):
+    def frequency(self) -> int:
         return self._frequency
 
     @frequency.setter

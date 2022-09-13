@@ -14,17 +14,32 @@ from fixate.config.helper import (
     get_config_dict,
     render_template,
 )
+from fixate.sequencer import Sequencer
 import os.path
 import json
 import dataclasses
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 import enum
 import re
 
 LOCAL_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "local_config.json")
 
-INSTRUMENTS = []
-RESOURCES = {}
+
+class InstrumentType(enum.Enum):
+    SERIAL = "serial"
+    VISA = "visa"
+
+
+@dataclasses.dataclass()
+class InstrumentConfig:
+    id: str
+    address: str
+    instrument_type: InstrumentType
+    parameters: Dict[str, str]
+
+
+INSTRUMENTS: List[InstrumentConfig] = []
+RESOURCES: dict[Literal["SEQUENCER"], Sequencer] = {}
 
 DEBUG = False
 # Begin default "plugins"
@@ -49,19 +64,6 @@ plg_csv = {
 
 
 index = None
-
-
-class InstrumentType(enum.Enum):
-    SERIAL = "serial"
-    VISA = "visa"
-
-
-@dataclasses.dataclass()
-class InstrumentConfig:
-    id: str
-    address: str
-    instrument_type: InstrumentType
-    parameters: Dict[str, str]
 
 
 def load_local_config(local_config_path: str) -> List[InstrumentConfig]:

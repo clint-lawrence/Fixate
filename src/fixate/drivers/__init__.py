@@ -1,8 +1,9 @@
-try:
-    from typing import Protocol
-except ImportError:
-    # Protocol added in python 3.8
-    from typing_extensions import Protocol
+from typing import Protocol
+
+# try:
+# except ImportError:
+#     # Protocol added in python 3.8
+#     from typing_extensions import Protocol
 
 import pubsub.pub
 

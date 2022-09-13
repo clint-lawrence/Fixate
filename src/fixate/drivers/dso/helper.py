@@ -13,11 +13,7 @@ class CallableNoArgs:
         return self._call()
 
     def _call(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class CallableBool:
@@ -25,196 +21,92 @@ class CallableBool:
         return self._call(value)
 
     def _call(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class SourcesCh:
     def ch1(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def ch2(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def ch3(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def ch4(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class SourcesSpecial:
     def function(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def math(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class SourcesWMem:
     def wmemory1(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def wmemory2(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class SourcesExt:
     def external(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class SourcesDig:
     def d0(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d1(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d2(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d3(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d4(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d5(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d6(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d7(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d8(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d9(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d10(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d11(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d12(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d13(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d14(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def d15(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class MeasureAllSources(
@@ -259,57 +151,29 @@ class MultiMeasureSources(MeasureAllSources):
 
 class Coupling:
     def ac(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def dc(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def lf_reject(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def tv(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Probe:
     def attenuation(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class VerticalUnits:
     def volts(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def amps(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class ChannelBase(CallableBool):
@@ -324,46 +188,22 @@ class ChannelBase(CallableBool):
         self.units = VerticalUnits()
 
     def bandwidth(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def bandwidth_limit(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def impedance(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def invert(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def offset(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def scale(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Trigger:
@@ -375,64 +215,32 @@ class Trigger:
         self.sweep = TrigSweep()
 
     def force(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def hf_reject(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def hold_off(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def n_reject(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class TrigSweep:
     def auto(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def normal(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class TrigLevel:
     def high(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def low(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class TrigMode:
@@ -446,64 +254,32 @@ class TrigEdge(CallableNoArgs):
         self.slope = Slopes()
 
     def level(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class TrigReject:
     def off(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def lf(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def hf(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Slopes:
     def rising(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def falling(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def alternating(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def either(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Acquire:
@@ -511,48 +287,24 @@ class Acquire:
         self.mode = AcquireMode()
 
     def normal(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def peak_detect(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def averaging(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def high_resolution(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class AcquireMode:
     def rtim(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def segm(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Timebase:
@@ -560,48 +312,24 @@ class Timebase:
         self.mode = TimebaseMode()
 
     def position(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def scale(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class TimebaseMode:
     def main(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def window(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def xy(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def roll(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Events:
@@ -611,11 +339,7 @@ class Events:
         Calls to this will clear the existing trigger events
         :return:
         """
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class MeasureInterval:
@@ -644,11 +368,7 @@ class Threshold:
         :param lower: Lower Threshold
         :return:
         """
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def absolute(self, upper: number, middle: number, lower: number):
         """
@@ -657,11 +377,7 @@ class Threshold:
         :param lower: Lower Threshold
         :return:
         """
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Define:
@@ -766,39 +482,19 @@ class DSO(metaclass=ABCMeta):
         pass
 
     def run(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def single(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def stop(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def scale(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def offset(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def init_api(self):
         for func_str, handler, base_str in self.api:

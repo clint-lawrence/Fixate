@@ -397,7 +397,7 @@ class RigolDG1022(FuncGen):
         return self.instrument.query_ascii_values("VOLTAGE:CH2?")[0]
 
     @amplitude_ch1.setter
-    def amplitude_ch1(self, val):
+    def amplitude_ch1(self, val):  # noqa
         self._write("VOLTAGE {}".format(val))
 
     @amplitude_ch2.setter

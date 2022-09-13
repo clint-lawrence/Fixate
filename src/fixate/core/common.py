@@ -416,10 +416,10 @@ class TestClass:
     test_desc = None
     test_desc_long = None
     attempts = 1
-    tests = []
+    # tests = []
     retry_type = RT_PROMPT
     retry_exceptions = [BaseException]  # Depreciated
-    skip_exceptions = []
+    # skip_exceptions = []
     abort_exceptions = [KeyboardInterrupt, AttributeError, NameError]
     skip_on_fail = False
 

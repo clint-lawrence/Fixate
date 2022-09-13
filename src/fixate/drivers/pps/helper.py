@@ -1,71 +1,38 @@
-import inspect
 from abc import ABCMeta
 
 from fixate.core.exceptions import InstrumentFeatureUnavailable
 
-import typing
+from typing import List, Union
 
-number = typing.Union[float, int]
+number = Union[float, int]
 
 
 class Groups:
     def group1(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def group2(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def group3(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def group4(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def group5(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Measure:
     def voltage(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def current(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def power(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class Timer:
@@ -82,11 +49,7 @@ class Timer:
         """
 
     def _call(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def __call__(self, value: bool):
         self._call(value)
@@ -98,32 +61,16 @@ class Channel:
         self.timer = Timer()
 
     def voltage(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def current(self, value: number):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def wave(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def _call(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def __call__(self, value: bool):
         self._call(value)
@@ -131,36 +78,20 @@ class Channel:
 
 class Address:
     def ip(self, value: str):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def mask(self, value: str):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def gate(self, value: str):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def dhcp(self, value: bool):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
 
 class PPS(metaclass=ABCMeta):
-    _baud_rates = []
+    _baud_rates: List[int] = []
     REGEX_ID = "PPS"
     INSTR_TYPE = ""
 
@@ -175,26 +106,14 @@ class PPS(metaclass=ABCMeta):
         self.parallel = Channel()
 
     def series(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def idn(self):
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
 
     def get_identity(self):
         """
         same function as idn, but discover.py expects this function
         I don't know if any test scripts reference idn so I won't refactor it
         """
-        raise InstrumentFeatureUnavailable(
-            "{} not available on this device".format(
-                inspect.currentframe().f_code.co_name
-            )
-        )
+        raise InstrumentFeatureUnavailable()
